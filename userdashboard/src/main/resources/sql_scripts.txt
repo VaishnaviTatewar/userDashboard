@@ -1,0 +1,140 @@
+create table community
+(
+	community_id integer not null
+		constraint id
+			primary key,
+	community_name varchar(255)
+);
+
+alter table community owner to postgres;
+
+create table "user"
+(
+	user_id serial not null
+		constraint user_pk
+			primary key,
+	user_name varchar(255),
+	community_id integer
+		constraint user_community_community_id_fk
+			references community,
+	email_id varchar(255) not null,
+	password varchar(255) not null
+);
+
+alter table "user" owner to postgres;
+
+create unique index user_user_id_uindex
+	on "user" (user_id);
+
+create unique index user_email_id_uindex
+	on "user" (email_id);
+
+create unique index user_password_uindex
+	on "user" (password);
+
+create table tag
+(
+	tag_id serial not null
+		constraint tags_pk
+			primary key,
+	tag_desc varchar(255) not null,
+	score integer not null,
+	question_id integer
+);
+
+alter table tag owner to postgres;
+
+create unique index tags_tag_desc_uindex
+	on tag (tag_desc);
+
+create unique index tags_tag_id_uindex
+	on tag (tag_id);
+
+create table status
+(
+	status_id serial not null
+		constraint status_pk
+			primary key,
+	status_name varchar(255) not null
+);
+
+alter table status owner to postgres;
+
+create table vote
+(
+	vote_id serial not null
+		constraint votes_pk
+			primary key,
+	user_id integer
+		constraint vote_user_user_id_fk
+			references "user",
+	status_id integer
+		constraint vote_status_status_id_fk
+			references status,
+	answer_id integer
+);
+
+alter table vote owner to postgres;
+
+create unique index votes_vote_id_uindex
+	on vote (vote_id);
+
+create unique index status_status_id_uindex
+	on status (status_id);
+
+create unique index status_status_name_uindex
+	on status (status_name);
+
+create table question
+(
+	question_id serial not null
+		constraint question_pk
+			primary key,
+	tag_id integer
+		constraint question_tag_tag_id_fk
+			references tag,
+	user_id integer
+		constraint question_user_user_id_fk
+			references "user",
+	description varchar(255)
+);
+
+alter table question owner to postgres;
+
+alter table tag
+	add constraint tag_question_question_id_fk
+		foreign key (question_id) references question;
+
+create unique index question_question_id_uindex
+	on question (question_id);
+
+create table answer
+(
+	answer_id serial not null
+		constraint answer_pk
+			primary key,
+	question_id integer
+		constraint answer_question_question_id_fk
+			references question,
+	user_id integer
+		constraint answer_user_user_id_fk
+			references "user",
+	vote_id integer
+		constraint answer_vote_vote_id_fk
+			references vote,
+	description varchar(255)
+);
+
+alter table answer owner to postgres;
+
+alter table vote
+	add constraint vote_answer_answer_id_fk
+		foreign key (answer_id) references answer;
+
+
+
+insert into community values (1,'Student');
+insert into community values (2,'Professional');
+insert into community values (3,'Experts');
+
+insert into "user" values (1,'Foo',1,'foo@gmail.com','foo-bar');
